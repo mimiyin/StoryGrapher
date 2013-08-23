@@ -16,6 +16,8 @@ int maxNumberOfMedia = 1;
 // Gatekeepers for drawing and playing modes
 boolean isDrawable, isDrawing;
 boolean isPlayable, isTiming;
+boolean isExporting;
+String exportPath;
 
 // Rate at which we move across the screen
 // Is automatically calculated based on
@@ -42,20 +44,27 @@ AudioPlayer audio;
 float timer;
 ToggleButton play;
 Button clear;
-Button save;
 Button load;
-Button media;
+Button save;
+Button export;
+Button loadImages;
+Button loadAudio;
 
 // Highest point you can draw
 int mouseYMin = 50;
 
 void setup() {
   size(640, 480); 
-  media = new Button("Media", 1);
-  load = new Button("Load", 2);
-  save = new Button("Save", 3);
+  export = new Button("Export", 1);
+  save = new Button("Save", 2);
+
   play = new ToggleButton("Play", 4, "Stop");
   clear = new Button("Clear", 5);
+
+  loadAudio = new Button("Audio", 7);
+  loadImages = new Button("Images", 8);
+  load = new Button("Load", 9);
+
   imageMode(CENTER);
   frameRate(fRate);
 
@@ -108,18 +117,19 @@ void draw() {
       rectMode(CENTER);
       rect(50, 30, textWidth, 70);
     }
-
     // Display clock
     stroke(255);
     fill(255);
     text(clock, textWidth/2, 50);
   }
 
-  media.display();
-  load.display();
-  save.display();
-  play.display();
   clear.display();
+  play.display();
+  load.display();
+  loadImages.display();
+  loadAudio.display();
+  save.display();
+  export.display();
 }
 
 void initialize() {
@@ -144,10 +154,14 @@ void initialize() {
 
 void play() {
   if (numBeats > 0) {
-    sb.play();
+    sb.play();      
     Beat currentBeat = beats[getTIndex()];
-    currentBeat.drawDot(true);
     t += tSpeed;
+    if(isExporting)
+      saveFrame(exportPath + "/frame-##########.png");
+    
+    // Draw dot after you save frame
+    currentBeat.drawDot(true);
 
     // If we're done, reset the player
     if (t > lastBeatInd)
@@ -200,11 +214,7 @@ void mousePressed() {
   // Play or Stop storyboard
   else if (play.isHovered() && isPlayable) {
     if (!play.isOn) {
-      initPlayer();
-      isPlayable = true;
-      isDrawable = false;
-      timer = millis();
-      isTiming = true;
+      playEvent();
     }
     else {
       resetPlayer();
@@ -213,12 +223,28 @@ void mousePressed() {
   }
   else if (save.isHovered())
     save();
+  else if (export.isHovered()) {
+    setExportFolder();
+    isExporting = true;
+    playEvent();
+  }
 
   else if (load.isHovered())
     load();
 
-  else if (media.isHovered())
-    setMediaFolder();
+  else if (loadAudio.isHovered())
+    setAudioFile();
+
+  else if (loadImages.isHovered())
+    setImagesFolder();
+}
+
+void playEvent() {
+  initPlayer();
+  isPlayable = true;
+  isDrawable = false;
+  timer = millis();
+  isTiming = true;
 }
 
 void mouseReleased() {

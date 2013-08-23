@@ -7,7 +7,7 @@ class Button {
   String label;
 
   Button(String _label, int xMult) {
-    side = 50;
+    side = 60;
     x = width-((side + 10)*xMult);
     y = side/4;
     label = _label;
@@ -21,7 +21,7 @@ class Button {
     textAlign(CENTER, CENTER);
     rect(x, y, side, side/2);
     fill(255);
-    text(label, x+(side/2), y+(side/4));
+    text(label, x+(side/2), y+(side/5));
   }
 
   boolean isHovered() {
@@ -111,41 +111,41 @@ void saveBeats(File file) {
   saveStrings(file.getAbsolutePath(), savedBeats);
 }
 
-void setMediaFolder() {
-  selectFolder("Select Media Folder", "loadMedia");
+void setAudioFile() {
+  selectInput("Select Audio File", "loadAudio");
 }
 
-void loadMedia(File selection) {
-  String folder = selection.getName();
+// Load audio file
+void loadAudio(File file) {
+  String path = file.getAbsolutePath();
   try {
-    audio = minim.loadFile(folder + "/audio.mp3");
+    audio = minim.loadFile(path);
     seconds = Math.round(audio.length()/1000);
     println("The audio is " + seconds + "s long.");
   }
   catch(Exception e) {
     println("No audio");
   }
-  
-  int i = 0;
-  // Try to load images
-  while (i < maxNumberOfMedia) {
-    String path = folder + "/" + nf(i, 4) + ".jpg";
-    boolean isSuccess = true;
-    PImage img = createImage(0, 0, RGB);
-    try {
-      img = loadImage(path);
-    }
-    catch(Exception e) {
-      isSuccess = false;
-      println("No image at: " + path);
-    }
+}
 
-    if (isSuccess) {
-      images.add(img);
-      i++;
-    }
-    else
-      break;
+void setImagesFolder() {
+  selectFolder("Select Media Folder", "loadImages");
+}
+
+// Load images from selected folder
+void loadImages(File folder) {
+  for (int i = 0; i < folder.listFiles().length; i++) {
+    String path = folder.getAbsolutePath() + "/" + nf(i, 4) + ".jpg";
+    boolean isSuccess = true;
+    images.add(loadImage(path));
   }
 }
 
+void setExportFolder() {
+    selectFolder("Select Media Folder", "setExportPath");  
+}
+
+void setExportPath(File folder) {
+  exportPath = folder.getAbsolutePath();
+  println(exportPath);
+}
