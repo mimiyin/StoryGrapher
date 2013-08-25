@@ -52,29 +52,6 @@ class ToggleButton extends Button {
   }
 }
 
-void initPlayer() {
-  sb.init();
-  t = firstBeatInd;
-  try {
-    audio.cue(0);
-    audio.play();
-  }
-  catch(Exception e) {
-    println("No audio to play.");
-  }
-}
-void resetPlayer() {
-  initPlayer();
-  drawDots();
-
-  try {
-    audio.pause();
-  }
-  catch(Exception e) {
-    println("No audio to pause.");
-  }
-}
-
 void load() {
   // Pause drawing while we load the file
   initialize();
@@ -82,12 +59,15 @@ void load() {
 }
 
 void loadBeats(File file) {
+  isDrawable = false;
   String[] savedBeats = loadStrings(file.getAbsolutePath());
   beats = new Beat[savedBeats.length];
   for (int i = 0; i < savedBeats.length; i++) {
     String[] savedBeat = savedBeats[i].split(", ");
     beats[i] = new Beat(Float.parseFloat(savedBeat[0]), Float.parseFloat(savedBeat[1]), Boolean.parseBoolean(savedBeat[2]));
   }
+  // Allow drawing again
+  isDrawable = true;
 
   // Get ready to play
   isPlayable = true;
@@ -107,8 +87,8 @@ void saveBeats(File file) {
     savedBeat += concatenator + beat.isUserCreated;
     savedBeats[i] = savedBeat;
   }
-  println(file.getName());
   saveStrings(file.getAbsolutePath(), savedBeats);
+  println("Saved " + file.getName() + " to: " + file.getAbsolutePath());
 }
 
 void setAudioFile() {
@@ -117,35 +97,57 @@ void setAudioFile() {
 
 // Load audio file
 void loadAudio(File file) {
-  String path = file.getAbsolutePath();
+  if (file == null) {
+    println("Loading audio file cancelled.");  
+    return;
+  }
+  
   try {
-    audio = minim.loadFile(path);
-    seconds = Math.round(audio.length()/1000);
-    println("The audio is " + seconds + "s long.");
+    sb.addAudio(file.getAbsolutePath());
   }
   catch(Exception e) {
     println("No audio");
   }
 }
 
-void setImagesFolder() {
-  selectFolder("Select Media Folder", "loadImages");
+void setScenesFolder() {
+  selectFolder("Select Folder to Load Images or Movies", "loadScenes");
 }
 
 // Load images from selected folder
-void loadImages(File folder) {
-  for (int i = 0; i < folder.listFiles().length; i++) {
-    String path = folder.getAbsolutePath() + "/" + nf(i, 4) + ".jpg";
-    boolean isSuccess = true;
-    images.add(loadImage(path));
+void loadScenes(File folder) {
+  if (folder == null) {
+    println("Loading images/movies cancelled.");  
+    return;
+  }
+
+  // Clear out existing scenes
+  sb.initScenes();
+
+  File [] files = folder.listFiles();
+  for (int i = 0; i < files.length; i++) {
+    String filename = files[i].getName().toLowerCase();
+    String path = files[i].getAbsolutePath();
+    if (filename.matches(".+\\.(png|jpg|jpeg|gif|tga)$")) {
+      try {
+        sb.addStill(path);
+      }
+      catch(Exception e) {
+        println("No image at: " + i);
+      }
+    }
+    else if (filename.matches(".+\\.mov$")) {
+      sb.addClip(path);
+    }
   }
 }
 
 void setExportFolder() {
-    selectFolder("Select Media Folder", "setExportPath");  
+  selectFolder("Select Media Folder", "setExportPath");
 }
 
 void setExportPath(File folder) {
   exportPath = folder.getAbsolutePath();
   println(exportPath);
 }
+

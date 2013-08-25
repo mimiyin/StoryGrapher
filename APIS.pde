@@ -6,8 +6,8 @@ ArrayList<PImage>  getFlickr() {
   ////////////////////////////////
   ////////////////////////////////
 
-  String APIKey = "0a9391809bd0efda1c2c0198397b7bf0";
-  String APISig = "0cda18c9789572ba444826c42b796bb4";
+  String APIKey = "YOUR_API_KEY";
+  String APISig = "YOUR_API_SIG";
   String query = "war";
   int page = 1;
   String APICall = "http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=" + APIKey + "&text=" + query +"&extras=url_o&page=" + page + "&format=json&nojsoncallback=1";
@@ -45,8 +45,8 @@ ArrayList<PImage> getGoogle() {
   ////////////////////////////////
   ////////////////////////////////
 
-  String APIKey = "AIzaSyAyX0SAKhPbwRVU6tZpEOIt7A5XbKJx7bg";
-  String cx = "016258877628183636436:qnjsbiws_fw";
+  String APIKey = "YOUR_API_KEY_HERE";
+  String cx = "YOUR_CX_HERE";
   String query = "portrait";
   String APICall = "https://www.googleapis.com/customsearch/v1?key=" + APIKey +"&cx=" + cx + "&q=" + query;  
   println(APICall);

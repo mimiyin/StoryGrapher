@@ -31,7 +31,7 @@ class Beat {
       fill(255, 0, 0);
     else
       fill(0, 200);
-    ellipse(beat, rawTempo, 10, 10);    
+    ellipse(beat, rawTempo, 10, 10);
   }
 }
 
@@ -100,5 +100,34 @@ int findNextBeat(int _i) {
   // If there are no more beats
   // Send the last beat
   return lastBeatInd;
+}
+
+
+void calcTrans() {
+  // Clear it out each time
+  transitions = new ArrayList<Float>();
+  float counter = 0;
+  for (float i = 0; i < beats.length-1; i += tSpeed) {
+    int b = (int) Math.round(i);
+    if (beats[b].rawTempo > mouseYMin) {
+      counter += beats[b].tempo;
+      if (counter > totalFrames) {
+        transitions.add(new Float(b));
+        counter = 0;
+      }
+    }
+  }
+}
+
+void drawTrans() {
+  strokeWeight(1);
+  stroke(128, 100);
+  for (int i = 0; i < transitions.size(); i++) {
+    float transition = transitions.get(i);
+    line (transition, 0, transition, height);
+    fill(255, 0, 0);
+    textSize(12);
+    text((int)Math.round(i)+1, transition, height-10);
+  }
 }
 

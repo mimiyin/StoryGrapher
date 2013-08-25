@@ -11,11 +11,9 @@ int fRate = 30;
 int totalFrames = (int)seconds*fRate;
 int maxNumberOfMedia = 1;
 
-
-
 // Gatekeepers for drawing and playing modes
 boolean isDrawable, isDrawing;
-boolean isPlayable, isTiming;
+boolean isPlayable;
 boolean isExporting;
 String exportPath;
 
@@ -28,15 +26,10 @@ float tSpeed = 0;
 // Storing data from your graph
 Beat[] beats;
 int firstBeatInd, lastBeatInd, numBeats;
+ArrayList<Float>transitions = new ArrayList<Float>();
+
 // Managing moving through your content
 Storyboard sb;
-
-// Your content
-ArrayList<PImage> images;
-ArrayList<Movie> movies;
-Minim minim;
-AudioPlayer audio;
-
 
 // Keeping track oftime
 // elapsed since clicking
@@ -47,7 +40,7 @@ Button clear;
 Button load;
 Button save;
 Button export;
-Button loadImages;
+Button loadScenes;
 Button loadAudio;
 
 // Highest point you can draw
@@ -62,29 +55,17 @@ void setup() {
   clear = new Button("Clear", 5);
 
   loadAudio = new Button("Audio", 7);
-  loadImages = new Button("Images", 8);
+  loadScenes = new Button("Scenes", 8);
   load = new Button("Load", 9);
 
   imageMode(CENTER);
   frameRate(fRate);
 
-  minim = new Minim(this);
-  images = new ArrayList<PImage>();
-
-
-  // Get images from Flickr or Google
-  //images = getFlickr();
-  //images = getGoogle();
-  //File data = new File("data");
-  // Or local data folder
-  //loadMedia(data);
-  println("HOW MANY IMAGES " + images.size());  
-  sb = new Storyboard(images);
+  sb = new Storyboard(this);
   initialize();
 }
 
 void draw() {
-
   // Drawing the storyboard graph
   if (isDrawable) {
     background(255);
@@ -96,7 +77,7 @@ void draw() {
     }
     drawDots();
   }
-  else if (isTiming) {
+  else {
     //Calculate time elapsed
     //Since beginning of storyboard
     String clock = "";
@@ -106,27 +87,20 @@ void draw() {
     textAlign(CENTER);
     textSize(48);
     float textWidth = textWidth(clock+5);
-
-    if (play.isOn) {
-      play();
-      timer = timer + (millis() - timer);
-    }
-    // When stopped, show end-time
-    else {
-      fill(0);
-      rectMode(CENTER);
-      rect(50, 30, textWidth, 70);
-    }
+    play();
+    timer = timer + (millis() - timer);
     // Display clock
     stroke(255);
     fill(255);
-    text(clock, textWidth/2, 50);
+    text(clock, textWidth/2, height-10);
   }
+
+  drawTrans();
 
   clear.display();
   play.display();
   load.display();
-  loadImages.display();
+  loadScenes.display();
   loadAudio.display();
   save.display();
   export.display();
@@ -142,30 +116,32 @@ void initialize() {
     beats[i] = createBeat(i, mouseYMin, false);
   }
 
+  transitions = new ArrayList<Float>();
+
   // Allow drawing
   // Don't allow playing
   // Reset beats array to
   // "hasn't been interpolated yet"
   isDrawable = true;
   isPlayable = false;
-  isTiming = false;
+  pauseEvent();
 }
 
 
 void play() {
   if (numBeats > 0) {
-    sb.play();      
+    sb.run();      
     Beat currentBeat = beats[getTIndex()];
     t += tSpeed;
-    if(isExporting)
+    if (isExporting)
       saveFrame(exportPath + "/frame-##########.png");
-    
+
     // Draw dot after you save frame
     currentBeat.drawDot(true);
 
     // If we're done, reset the player
     if (t > lastBeatInd)
-      resetPlayer();
+      pauseEvent();
 
     // Update storyboard tempo
     // with next beat
@@ -217,7 +193,7 @@ void mousePressed() {
       playEvent();
     }
     else {
-      resetPlayer();
+      pauseEvent();
     }    
     play.toggle();
   }
@@ -226,7 +202,6 @@ void mousePressed() {
   else if (export.isHovered()) {
     setExportFolder();
     isExporting = true;
-    playEvent();
   }
 
   else if (load.isHovered())
@@ -235,22 +210,31 @@ void mousePressed() {
   else if (loadAudio.isHovered())
     setAudioFile();
 
-  else if (loadImages.isHovered())
-    setImagesFolder();
+  else if (loadScenes.isHovered())
+    setScenesFolder();
 }
 
 void playEvent() {
-  initPlayer();
+  t = firstBeatInd;
   isPlayable = true;
   isDrawable = false;
   timer = millis();
-  isTiming = true;
+  sb.startEvent();
+}
+
+void pauseEvent() {
+  sb.stopEvent();
+  drawDots();
+  isDrawable = true;
+  isExporting = false;
 }
 
 void mouseReleased() {
   isDrawing = false;
-  if (isDrawable)
+  if (isDrawable) {
     interpolate();
+    calcTrans();
+  }
 
   if (play.isHovered() && isPlayable && !play.isOn)
     isDrawable = true;
