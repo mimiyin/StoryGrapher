@@ -34,7 +34,7 @@ Storyboard sb;
 // Keeping track oftime
 // elapsed since clicking
 // Play button
-float timer;
+float timer, startTime;
 ToggleButton play;
 Button clear;
 Button load;
@@ -77,7 +77,7 @@ void draw() {
     }
     drawDots();
   }
-  else {
+  else if (isPlayable) {
     //Calculate time elapsed
     //Since beginning of storyboard
     String clock = "";
@@ -88,7 +88,7 @@ void draw() {
     textSize(48);
     float textWidth = textWidth(clock+5);
     play();
-    timer = timer + (millis() - timer);
+    timer = millis() - startTime;
     // Display clock
     stroke(255);
     fill(255);
@@ -136,12 +136,14 @@ void play() {
     if (isExporting)
       saveFrame(exportPath + "/frame-##########.png");
 
+    // If we're done, reset the player
+    if (t >= lastBeatInd) {
+      pauseEvent();
+      return;
+    }
+
     // Draw dot after you save frame
     currentBeat.drawDot(true);
-
-    // If we're done, reset the player
-    if (t > lastBeatInd)
-      pauseEvent();
 
     // Update storyboard tempo
     // with next beat
@@ -181,22 +183,51 @@ void drawDots() {
 //////////////////////////////////////////
 void mousePressed() {
   isDrawing = true;
+  // Play or Stop storyboard
+  if (play.isHovered() && isPlayable) {
+    if (play.isOn)
+      pauseEvent();
+    else
+      playEvent();
+  }
+  else if (isDrawable) {
+    pauseEvent();
+  }
+}
+
+void playEvent() {
+  play.toggle(true);
+
+  t = firstBeatInd;
+  isPlayable = true;
+  isDrawable = false;
+  startTime = millis();
+  sb.startEvent();
+}
+
+void pauseEvent() {
+  play.toggle(false);
+
+  sb.stopEvent();
+  drawDots();
+  isDrawable = true;
+  isExporting = false;
+}
+
+void mouseReleased() {
+  isDrawing = false;
+  if (isDrawable) {
+    interpolate();
+    calcTrans();
+  }
+
+  if (play.isHovered() && isPlayable && !play.isOn)
+    isDrawable = true;
 
   // Clear graph
   // Re-initialize beats array
-  if (clear.isHovered() && !play.isOn)
+  else if (clear.isHovered())
     initialize();
-
-  // Play or Stop storyboard
-  else if (play.isHovered() && isPlayable) {
-    if (!play.isOn) {
-      playEvent();
-    }
-    else {
-      pauseEvent();
-    }    
-    play.toggle();
-  }
   else if (save.isHovered())
     save();
   else if (export.isHovered()) {
@@ -214,46 +245,27 @@ void mousePressed() {
     setScenesFolder();
 }
 
-void playEvent() {
-  t = firstBeatInd;
-  isPlayable = true;
-  isDrawable = false;
-  timer = millis();
-  sb.startEvent();
-}
-
-void pauseEvent() {
-  sb.stopEvent();
-  drawDots();
-  isDrawable = true;
-  isExporting = false;
-}
-
-void mouseReleased() {
-  isDrawing = false;
-  if (isDrawable) {
-    interpolate();
-    calcTrans();
-  }
-
-  if (play.isHovered() && isPlayable && !play.isOn)
-    isDrawable = true;
-}
-
 void mouseDragged() {
-  // ERASE
+  if (isOffScreen(new PVector(mouseX, mouseY)) || isOffScreen(new PVector(pmouseX, pmouseY)))
+    return;
+
+  // Erase dots between current and previous mouse positions   
   if (isDrawable) {
     boolean isGoingRight = mouseX > pmouseX;
     if (isGoingRight) {
-      for (int i = pmouseX + 1; i < mouseX; i++) {
+      for (int i = pmouseX + 1; i < mouseX - 1; i++) {
         beats[i] = createBeat(i, mouseYMin, false);
       }
     }
     else {
-      for (int i = pmouseX - 1; i > mouseX; i--) {
+      for (int i = pmouseX - 1; i > mouseX + 1; i--) {
         beats[i] = createBeat(i, mouseYMin, false);
       }
     }
   }
+}
+
+boolean isOffScreen(PVector pos) {
+  return pos.x <= 0 || pos.x >= width || pos.y <= mouseYMin || pos.y >= height;
 }
 

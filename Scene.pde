@@ -9,7 +9,6 @@ class Scene {
   }
 
   Scene(Movie mov) {
-    
     clip = mov;
     clip.play();
     dur = clip.duration();
@@ -20,9 +19,9 @@ class Scene {
 
   void run(float counter, float light) {
     if (isClip) {
-      float seconds = (counter/totalFrames)*dur;
+      float s = (counter/totalFrames)*dur;
       clip.play();
-      clip.jump(seconds);
+      clip.jump(s);
       if (clip.available()) {
         clip.read();
         tint(255, 255);

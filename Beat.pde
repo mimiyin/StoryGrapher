@@ -6,8 +6,8 @@ class Beat {
 
   Beat(float _beat, float _tempo, boolean _isUserCreated) {
     beat = _beat;
-    tempo = _tempo;
-    rawTempo = tempo;
+    rawTempo = _tempo;
+    tempo = 0;
     isUserCreated = _isUserCreated;
   }
 
@@ -22,7 +22,7 @@ class Beat {
     float exp = map(rawTempo, height, mouseYMin, expMin, expMax);   
     float log = exp(exp);
     tempo = map(log, exp(expMin), exp(expMax), 1, max);
-    //println("Beat: " + beat + "\tRaw Tempo: " + rawTempo + "\tNatural Log: " + log + "\tTempo: " + tempo + "\tTempo in seconds: " + ((totalFrames/tempo)/fRate));
+    //println("Beat: " + beat + "\tRaw Tempo: " + rawTempo + "\tNatural Log: " + log + "\tTempo: " + tempo);
   }
 
   void drawDot(boolean isRed) {
@@ -59,11 +59,11 @@ void interpolate() {
   int prevBeatInd = firstBeatInd;
   int nextBeatInd = findNextBeat(firstBeatInd + 1);
   int indRange = nextBeatInd-prevBeatInd;
-  PVector prevBeat = new PVector (beats[0].beat, beats[0].rawTempo);
+  PVector prevBeat = new PVector (beats[firstBeatInd].beat, beats[firstBeatInd].rawTempo);
   PVector nextBeat = new PVector (beats[nextBeatInd].beat, beats[nextBeatInd].rawTempo);
   PVector range = PVector.sub(nextBeat, prevBeat);
   float progress = 0;
-  for (int i = 0; i < (lastBeatInd + 1); i++) {
+  for (int i = firstBeatInd; i <= lastBeatInd; i++) {
     Beat thisBeat = beats[i];
     float beat = thisBeat.beat;
     float tempo = thisBeat.rawTempo;
@@ -107,14 +107,12 @@ void calcTrans() {
   // Clear it out each time
   transitions = new ArrayList<Float>();
   float counter = 0;
-  for (float i = 0; i < beats.length-1; i += tSpeed) {
+  for (float i = 0; i <= lastBeatInd; i += tSpeed) {
     int b = (int) Math.round(i);
-    if (beats[b].rawTempo > mouseYMin) {
-      counter += beats[b].tempo;
-      if (counter > totalFrames) {
-        transitions.add(new Float(b));
-        counter = 0;
-      }
+    counter += beats[b].tempo;
+    if (counter > totalFrames) {
+      transitions.add(new Float(b));
+      counter = 0;
     }
   }
 }

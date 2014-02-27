@@ -42,9 +42,10 @@ class ToggleButton extends Button {
     label = _label;
     onLabel = _label;
     offLabel = _offLabel;
+    isOn = true;
   }
-  void toggle() {
-    isOn = !isOn; 
+  void toggle(boolean _isOn) {
+    isOn = _isOn;
     if (isOn)
       label = offLabel;
     else
@@ -55,17 +56,27 @@ class ToggleButton extends Button {
 void load() {
   // Pause drawing while we load the file
   initialize();
+  isDrawable = false;
   selectInput("Load Graph", "loadBeats");
 }
 
 void loadBeats(File file) {
-  isDrawable = false;
+  if (file == null) {
+    println("Loading graph cancelled.");
+    return;
+  }
   String[] savedBeats = loadStrings(file.getAbsolutePath());
   beats = new Beat[savedBeats.length];
   for (int i = 0; i < savedBeats.length; i++) {
     String[] savedBeat = savedBeats[i].split(", ");
     beats[i] = new Beat(Float.parseFloat(savedBeat[0]), Float.parseFloat(savedBeat[1]), Boolean.parseBoolean(savedBeat[2]));
   }
+
+
+  // Re-calculate
+  interpolate();
+  calcTrans();
+
   // Allow drawing again
   isDrawable = true;
 
@@ -83,7 +94,7 @@ void saveBeats(File file) {
   for (int i = 0; i < beats.length; i++) {
     Beat beat = beats[i];
     String savedBeat = "" + beat.beat;
-    savedBeat += concatenator + beat.rawTempo;
+    savedBeat += concatenator + (beat.isUserCreated ? beat.rawTempo : mouseYMin);
     savedBeat += concatenator + beat.isUserCreated;
     savedBeats[i] = savedBeat;
   }
@@ -101,7 +112,7 @@ void loadAudio(File file) {
     println("Loading audio file cancelled.");  
     return;
   }
-  
+
   try {
     sb.addAudio(file.getAbsolutePath());
   }
@@ -147,6 +158,10 @@ void setExportFolder() {
 }
 
 void setExportPath(File folder) {
+  if (folder == null) {
+    println("Exporting data canceled.");
+    return;
+  }
   exportPath = folder.getAbsolutePath();
   println(exportPath);
 }

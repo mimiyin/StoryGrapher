@@ -11,7 +11,7 @@ class Storyboard {
   boolean hasAudio = false;
 
   int sceneIndex;
-  float counter, light, lightSpeed, rMult, gMult, bMult;
+  float counter, startTime, light, lightSpeed, rMult, gMult, bMult;
   float tempo; // how quickly to advance through scene
 
   Storyboard(PApplet p) {
@@ -25,9 +25,10 @@ class Storyboard {
     initSceneIndex();
     initScenes();
   }
-  
+
   void init() {
-    counter = 0;    
+    counter = 0;
+    startTime = millis();    
     light = 0;
     lightSpeed = 1;
     tempo = 1;
@@ -42,9 +43,9 @@ class Storyboard {
   void initSceneIndex() {
     sceneIndex = 0;
   }
-  
+
   void initScenes() {
-    scenes = new ArrayList<Scene>();    
+    scenes = new ArrayList<Scene>();
   }
 
   void addAudio(String path) {
@@ -52,7 +53,10 @@ class Storyboard {
     audio.cue(0);
     hasAudio = true;
     println("Loaded audio from: " + path);
-    println("The audio is " + Math.round(audio.length()/1000) + "s long.");
+  }
+
+  float getAudioDuration() {
+    return Math.round(audio.length()/1000);
   }
 
   void addStill(String path) {
@@ -70,8 +74,10 @@ class Storyboard {
   void startEvent() {
     init();
     initSceneIndex();
-    if (hasAudio)
+    if (hasAudio) {
+      audio.cue(0);
       audio.play();
+    }
   }
 
   void stopEvent() {
@@ -80,8 +86,7 @@ class Storyboard {
   }
 
   void update(float _tempo) {
-    tempo = _tempo;
-
+    tempo = _tempo; 
     // Set lightspeed so that it takes 
     // 1/2 the entire duration of the scene
     // to go from black to white
@@ -129,8 +134,9 @@ class Storyboard {
       init();
       if (hasScenes) {
         sceneIndex++;
-        if (sceneIndex > scenes.size()-1)
+        if (sceneIndex > scenes.size()-1) {
           sceneIndex = 0;
+        }
       }
     }
   }
