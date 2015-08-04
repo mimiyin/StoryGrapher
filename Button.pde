@@ -122,11 +122,11 @@ void loadAudio(File file) {
 }
 
 void setScenesFolder() {
-  selectFolder("Select Folder to Load Images or Movies", "loadScenes");
+  selectFolder("Select Folder to Load Images or Movies", "setScenesFolder");
 }
 
 // Load images from selected folder
-void loadScenes(File folder) {
+void setScenesFolder(File folder) {
   if (folder == null) {
     println("Loading images/movies cancelled.");  
     return;
@@ -165,4 +165,3 @@ void setExportPath(File folder) {
   exportPath = folder.getAbsolutePath();
   println(exportPath);
 }
-

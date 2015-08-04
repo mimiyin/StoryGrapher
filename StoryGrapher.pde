@@ -11,7 +11,7 @@ int fRate = 30;
 int totalFrames = (int)seconds*fRate;
 int maxNumberOfMedia = 1;
 
-// Gatekeepers for drawing and playing modes
+// Booleans for whether you're in draw or playback mode
 boolean isDrawable, isDrawing;
 boolean isPlayable;
 boolean isExporting;
@@ -47,7 +47,7 @@ Button loadAudio;
 int mouseYMin = 50;
 
 void setup() {
-  size(640, 480); 
+  size(1280, 720); 
   export = new Button("Export", 1);
   save = new Button("Save", 2);
 
@@ -268,4 +268,3 @@ void mouseDragged() {
 boolean isOffScreen(PVector pos) {
   return pos.x <= 0 || pos.x >= width || pos.y <= mouseYMin || pos.y >= height;
 }
-
