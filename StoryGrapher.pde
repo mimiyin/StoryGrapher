@@ -37,17 +37,19 @@ Storyboard sb;
 float timer, startTime;
 ToggleButton play;
 Button clear;
-Button load;
+Button loadGraph;
+Button loadVisuals;
+Button loadAudio;
 Button save;
 Button export;
-Button loadScenes;
-Button loadAudio;
 
 // Highest point you can draw
 int mouseYMin = 50;
 
 void setup() {
-  size(1280, 720); 
+  size(1280, 1080); 
+  // Fullscreen mode
+  //fullScreen(P2D, SPAN);
   export = new Button("Export", 1);
   save = new Button("Save", 2);
 
@@ -55,8 +57,8 @@ void setup() {
   clear = new Button("Clear", 5);
 
   loadAudio = new Button("Audio", 7);
-  loadScenes = new Button("Scenes", 8);
-  load = new Button("Load", 9);
+  loadVisuals = new Button("Visuals", 8);
+  loadGraph = new Button("Graph", 9);
 
   imageMode(CENTER);
   frameRate(fRate);
@@ -94,13 +96,16 @@ void draw() {
     fill(255);
     text(clock, textWidth/2, height-10);
   }
-
+  else if (!isDrawable && !isPlayable) {
+    background(255, 0, 0);
+  }
+  
   drawTrans();
 
   clear.display();
   play.display();
-  load.display();
-  loadScenes.display();
+  loadGraph.display();
+  loadVisuals.display();
   loadAudio.display();
   save.display();
   export.display();
@@ -235,13 +240,13 @@ void mouseReleased() {
     isExporting = true;
   }
 
-  else if (load.isHovered())
+  else if (loadGraph.isHovered())
     load();
 
   else if (loadAudio.isHovered())
     setAudioFile();
 
-  else if (loadScenes.isHovered())
+  else if (loadVisuals.isHovered())
     setScenesFolder();
 }
 

@@ -117,6 +117,7 @@ void calcTrans() {
   }
 }
 
+// Vertical lines demarcating each "scene"
 void drawTrans() {
   strokeWeight(1);
   stroke(128, 100);
@@ -128,4 +129,3 @@ void drawTrans() {
     text((int)Math.round(i)+1, transition, height-10);
   }
 }
-
