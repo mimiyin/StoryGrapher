@@ -6,7 +6,7 @@ import ddf.minim.*;
 /////SETTINGS FOR YOU//////
 ///////////////////////////
 ///////////////////////////
-float seconds = 90;
+float seconds = 60;
 int fRate = 30;
 int totalFrames = (int)seconds*fRate;
 int maxNumberOfMedia = 1;

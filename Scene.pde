@@ -24,7 +24,7 @@ class Scene {
       clip.jump(s);
       if (clip.available()) {
         clip.read();
-        tint(255, 255);
+        tint(255, light);
         image(clip, width/2, height/2);
       }
       clip.stop();

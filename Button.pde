@@ -122,13 +122,13 @@ void loadAudio(File file) {
 }
 
 void setScenesFolder() {
-  selectFolder("Select Folder to Load Images or Movies", "loadScenes");
+  selectFolder("Select Folder to Load Images", "loadScenes");
 }
 
 // Load images from selected folder
 void loadScenes(File folder) {
   if (folder == null) {
-    println("Loading images/movies cancelled.");  
+    println("Loading images cancelled.");  
     return;
   }
 
@@ -147,7 +147,7 @@ void loadScenes(File folder) {
         println("No image at: " + i);
       }
     }
-    else if (filename.matches(".+\\.mov$")) {
+    else if (filename.matches(".+\\.(mov|mp4)$")) {
       sb.addClip(path);
     }
   }
